@@ -4,13 +4,14 @@ import 'package:provider_test/core/utils/view_state.dart';
 
 class ApiService {
   final Dio _dio = Dio();
+
   //get
-  Future<ApiResponse> get(String endpoint, {String? token}) async {
+  Future<ApiResponse> get({String? endpoint, String? token}) async {
     try {
       if (token != null && token.isNotEmpty) {
         _dio.options.headers['Authorization'] = 'Bearer $token';
       }
-      final response = await _dio.get(endpoint);
+      final response = await _dio.get(endpoint!);
 
       if (response.statusCode == 200) {
         return ApiResponse(state: ViewState.success, data: response.data);
@@ -35,23 +36,23 @@ class ApiService {
       if (token != null && token.isNotEmpty) {
         _dio.options.headers['Authorization'] = 'Bearer $token';
       }
-      final response = await _dio.post(endpoint, data: data);
+
+      final response = await _dio.post(
+        endpoint,
+        data: data,
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ApiResponse apiResponse = ApiResponse(
-          state: ViewState.success,
-          data: response.data,
-        );
-        return apiResponse;
+        return ApiResponse(state: ViewState.success, data: response.data);
       } else {
-        ApiResponse apiResponse = ApiResponse(state: ViewState.error);
-        return apiResponse;
+        return ApiResponse(state: ViewState.error);
       }
     } on DioException catch (e) {
-      ApiResponse apiResponse = ApiResponse(
+      return ApiResponse(
         state: ViewState.error,
-        errorMessage: e.response?.data['error'],
+        errorMessage: e.response?.data['error'] ?? e.message,
       );
-      return apiResponse;
     }
   }
 }

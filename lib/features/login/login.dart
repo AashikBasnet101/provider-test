@@ -4,7 +4,9 @@ import 'package:provider_test/core/constants/app_color.dart';
 import 'package:provider_test/core/constants/app_string.dart';
 import 'package:provider_test/core/utils/view_state.dart';
 import 'package:provider_test/features/assignment/assignment.dart';
+import 'package:provider_test/features/home/bottom_navbar.dart';
 import 'package:provider_test/features/home/dashboard.dart';
+import 'package:provider_test/features/home/dashboard1.dart';
 import 'package:provider_test/features/provider/auth_provider.dart';
 import 'package:provider_test/features/signup/signup.dart';
 
@@ -96,7 +98,7 @@ class _LoginState extends State<Login> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          const AssignmentScreen(),
+                                          const BottomNavbar(),
                                     ),
                                   );
                                 } else if (authProvider.loginStatus ==

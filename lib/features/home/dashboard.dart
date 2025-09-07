@@ -1,41 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../provider/test_provider.dart';
+import 'package:provider_test/features/provider/dashboard_provider.dart';
+import 'package:provider_test/features/widgets/custom_icon_button.dart';
 
-class Dashboard extends StatefulWidget {
+class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
-
-  @override
-  State<Dashboard> createState() => _DashboardState();
-}
-
-class _DashboardState extends State<Dashboard> {
-  @override
-  void initState() {
-    super.initState();
-
-    // Load role from SharedPreferences via provider
-    Future.microtask(() {
-      final provider = Provider.of<TestProvider>(context, listen: false);
-      provider.readValue1();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Dashboard")),
-      body: Center(
-        child: Consumer<TestProvider>(
-          builder: (context, provider, child) {
-            // Display role or empty string if null
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(provider.role ?? "", style: const TextStyle(fontSize: 24)),
-              ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: buttons.map((btn) {
+            return Expanded(
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => btn["page"]),
+                  );
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(btn["icon"], size: 32, color: Colors.grey[700]),
+                    const SizedBox(height: 6),
+                    Text(btn["label"], style: const TextStyle(fontSize: 13)),
+                  ],
+                ),
+              ),
             );
-          },
+          }).toList(),
         ),
       ),
     );
