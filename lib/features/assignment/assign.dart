@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_test/core/constants/app_color.dart';
-import 'package:provider_test/features/provider/assignment_provider.dart';
+import 'package:provider_test/core/constants/app_string.dart';
+import 'package:provider_test/features/assignment/add_assignment.dart';
 import 'package:provider_test/features/provider/dashboard_provider.dart';
 
 class AssignmentPage extends StatefulWidget {
@@ -94,7 +95,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
         ],
       ),
 
-      // ✅ Floating Action Button
+      //  Floating Action Button
       floatingActionButton: Consumer<UserRoleProvider>(
         builder: (context, roleProvider, _) {
           if (roleProvider.role == "admin" || roleProvider.role == "teacher") {
@@ -102,7 +103,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const Text("hehe")),
+                  MaterialPageRoute(
+                    builder: (context) => const AddAssignment(),
+                  ),
                 );
               },
               backgroundColor: primaryColor,
@@ -117,20 +120,3 @@ class _AssignmentPageState extends State<AssignmentPage> {
 }
 
 /// Dummy Screens — replace with your real ones
-class AssignedScreen extends StatelessWidget {
-  const AssignedScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text("Assigned Assignments"));
-  }
-}
-
-class SubmittedScreen extends StatelessWidget {
-  const SubmittedScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text("Submitted Assignments"));
-  }
-}

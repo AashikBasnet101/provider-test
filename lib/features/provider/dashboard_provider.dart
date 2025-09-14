@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider_test/features/assignment/add_assignment.dart';
 import 'package:provider_test/features/assignment/assign.dart';
 import 'package:provider_test/features/assignment/assignment.dart';
 import 'package:provider_test/features/home/dashboard.dart';
@@ -41,21 +42,21 @@ final List<Map<String, dynamic>> buttons = [
     "label": "LogBook",
 
     "textColor": Colors.black,
-    "page": AssignmentScreen(),
+    "page": AssignmentPage(),
   },
   {
     "icon": Icons.copy,
     "label": "Course",
 
     "textColor": Colors.black,
-    "page": AssignmentScreen(),
+    "page": AssignmentPage(),
   },
   {
     "icon": Icons.insert_drive_file,
     "label": "Result",
 
     "textColor": Colors.black,
-    "page": AssignmentScreen(),
+    "page": AssignmentPage(),
   },
 ];
 

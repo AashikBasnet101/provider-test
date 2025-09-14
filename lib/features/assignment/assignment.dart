@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:provider_test/core/constants/app_color.dart';
-import 'package:provider_test/core/constants/app_string.dart';
+import 'package:provider_test/features/provider/assignment_provider.dart';
+
 import 'package:provider_test/features/provider/dashboard_provider.dart';
-import 'package:provider_test/features/widgets/custom_elevatedbutton.dart';
-import 'package:provider_test/features/widgets/custom_icon_button.dart';
-import '../provider/assignment_provider.dart';
 
 class AssignmentScreen extends StatefulWidget {
   const AssignmentScreen({super.key});
@@ -78,9 +75,61 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
                             return Column(
                               children: [
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    if (item.assignmentId != null) {
+                                      // Show confirmation dialog
+                                      bool? confirm = await showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: Text("Delete Assignment"),
+                                          content: Text(
+                                            "Do you really want to delete this assignment?",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(false),
+                                              child: Text("No"),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(true),
+                                              child: Text(
+                                                "Yes",
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      // If user confirmed, delete the assignment
+                                      if (confirm == true) {
+                                        await Provider.of<AssignmentProvider>(
+                                          context,
+                                          listen: false,
+                                        ).deleteAssignment(item.assignmentId!);
+
+                                        // Optional: show a snackbar after deletion
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "Assignment deleted successfully.",
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
                                   icon: Icon(Icons.delete, color: Colors.red),
                                 ),
+
                                 const SizedBox(height: 5),
                                 IconButton(
                                   onPressed: () {},

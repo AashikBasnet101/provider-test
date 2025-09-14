@@ -88,7 +88,7 @@ class _LoginState extends State<Login> {
                             backgroundColor: primaryColor,
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                await authProvider.LoginUser();
+                                await authProvider.loginUser();
 
                                 if (authProvider.loginStatus ==
                                     ViewState.success) {

@@ -108,9 +108,9 @@ class _SignupState extends State<Signup> {
                       DropDown(
                         labelText: genderLabel,
                         items: genderOptions,
-                        value: context.watch<AuthProvider>().gender, // reactive
+                        value: context.watch<AuthProvider>().gender,
                         onChanged: (val) {
-                          authProvider.setGender(val); // update provider
+                          authProvider.setGender(val);
                         },
                         validator: authProvider.genderValidator,
                       ),
@@ -118,9 +118,9 @@ class _SignupState extends State<Signup> {
                       DropDown(
                         labelText: roleLabel,
                         items: roleOptions,
-                        value: authProvider.role, // reactive
+                        value: authProvider.role,
                         onChanged: (val) {
-                          authProvider.setrole(val); // update provider
+                          authProvider.setRole(val);
                         },
                         validator: authProvider.roleValidator,
                       ),

@@ -4,79 +4,155 @@ import 'package:provider_test/core/services/api_services.dart';
 import 'package:provider_test/core/utils/api_response.dart';
 import 'package:provider_test/core/utils/view_state.dart';
 import 'package:provider_test/features/assignment/model/assignment.dart';
-import 'package:provider_test/features/assignment/model/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AssignmentProvider extends ChangeNotifier {
-  List<assignment> assignments = [];
-  List<Subjects> subjectlist = [];
+  // Form fields
+  String? title, description, semester, faculty, deadline;
   String selectedSubjectId = "";
-  ViewState getAssignmentStatus = ViewState.idle;
+
+  // Status
+  ViewState getSubjectStatus = ViewState.idle;
+  ViewState createAssignmentStatus = ViewState.idle;
+
+  // Data lists
+  List<Subject> subjectList = [];
+  List<Assignment> assignments = [];
+
+  // Loading & error
   bool isLoading = false;
   String? errorMessage;
 
-  final ApiService _apiService = ApiService();
+  ApiService apiService = ApiService();
 
-  Future<void> getAssignments() async {
-    isLoading = true;
-    notifyListeners();
+  // --- SUBJECTS ---
+  Future<void> getSubjects() async {
+    setSubjectStatus(ViewState.loading);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
 
-    setAssignmentStatus(ViewState state) {
-      getAssignmentStatus = state;
-      notifyListeners();
+    ApiResponse apiResponse = await apiService.get(
+      endpoint: AppApi.getsubjects,
+      token: token,
+    );
+
+    if (apiResponse.state == ViewState.success) {
+      subjectList = (apiResponse.data['data'] as List<dynamic>)
+          .map((e) => Subject.fromJson(e))
+          .toList();
+      setSubjectStatus(ViewState.success);
+    } else {
+      setSubjectStatus(ViewState.error);
     }
+  }
 
-    Future<void> getAssignment() async {
-      setAssignmentStatus(ViewState.loading);
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString("auth_token");
-      ApiResponse apiResponse = await ApiService().get(
-        endpoint: AppApi.getsubjects,
+  // Helper: get subject name by id
+  String getSubjectName(String? id) {
+    final subject = subjectList.firstWhere(
+      (s) => s.subjectId == id,
+      orElse: () => Subject(name: "Unknown"),
+    );
+    return subject.name ?? "";
+  }
+
+  void setSubjectStatus(ViewState state) {
+    getSubjectStatus = state;
+    notifyListeners();
+  }
+
+  void setCreateAssignmentStatus(ViewState state) {
+    createAssignmentStatus = state;
+    notifyListeners();
+  }
+
+  // --- ASSIGNMENTS ---
+  Future<void> getAssignments() async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      ApiResponse apiResponse = await apiService.get(
+        endpoint: AppApi.listAssignments,
         token: token,
       );
+
       if (apiResponse.state == ViewState.success) {
-        subjectlist.addAll(
-          (apiResponse.data['data'] as List<dynamic>)
-              .map((e) => Subjects.fromJson(e))
-              .toList(),
-        );
-        print(subjectlist);
-
-        setAssignmentStatus(ViewState.success);
-      } else if (apiResponse.state == ViewState.error) {
-        setAssignmentStatus(ViewState.error);
+        assignments = (apiResponse.data['data'] as List<dynamic>)
+            .map((e) => Assignment.fromJson(e))
+            .toList();
+      } else {
+        errorMessage =
+            apiResponse.errorMessage ?? "Failed to fetch assignments";
       }
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("auth_token");
-
-    if (token == null) {
-      errorMessage = "Token not found!";
+    } catch (e) {
+      errorMessage = e.toString();
+    } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // --- CREATE ASSIGNMENT ---
+  Future<void> createAssignment() async {
+    setCreateAssignmentStatus(ViewState.loading);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    AssignmentCreate assignment = AssignmentCreate(
+      title: title,
+      description: description,
+      subjectId: selectedSubjectId,
+      deadline: deadline,
+      semester: semester,
+      faculty: faculty,
+    );
+
+    // Debug print
+    print("Posting Assignment: ${assignment.toJson()}");
+
+    ApiResponse apiResponse = await apiService.post(
+      AppApi.createAssignment,
+      data: assignment.toJson(),
+      token: token,
+    );
+
+    if (apiResponse.state == ViewState.success) {
+      setCreateAssignmentStatus(ViewState.success);
+      // refresh assignment list
+      await getAssignments();
+    } else {
+      print("Error posting assignment: ${apiResponse.errorMessage}");
+      setCreateAssignmentStatus(ViewState.error);
+    }
+  }
+
+  // --- DELETE ASSIGNMENT ---
+  Future<void> deleteAssignment(String assignmentId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (token == null) {
+      errorMessage = "Auth token not found.";
       notifyListeners();
       return;
     }
 
-    final response = await _apiService.get(
-      endpoint: AppApi.listAssignments,
-      token: token,
-    );
+    // Construct URL using the static API endpoint appended with the assignment ID
+    final String url = AppApi.deleteAssignment + assignmentId;
 
+    ApiResponse response = await apiService.delete(url, token: token);
     if (response.state == ViewState.success) {
-      print("Assignments response: ${response.data}");
-      final List data = response.data['data']; // extract list
-      assignments = data.map((json) => assignment.fromJson(json)).toList();
+      // Remove the assignment from your list
+      assignments.removeWhere(
+        (assignment) => assignment.assignmentId == assignmentId,
+      );
+      notifyListeners();
     } else {
-      errorMessage = response.errorMessage ?? "Failed to fetch assignments";
+      errorMessage = response.errorMessage;
+      notifyListeners();
     }
-
-    isLoading = false;
-    notifyListeners();
   }
 }
-
-final List<Map<String, dynamic>> tabs = [
-  {"icon": Icons.edit, "text": "Assigned"},
-  {"icon": Icons.description, "text": "Submitted"},
-];

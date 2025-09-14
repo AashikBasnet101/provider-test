@@ -1,4 +1,4 @@
-class assignment {
+class Assignment {
   String? assignmentId;
   String? title;
   String? description;
@@ -8,7 +8,7 @@ class assignment {
   String? faculty;
   String? semester;
 
-  assignment({
+  Assignment({
     this.assignmentId,
     this.title,
     this.description,
@@ -17,9 +17,10 @@ class assignment {
     this.deadline,
     this.faculty,
     this.semester,
+    required String subjectId,
   });
 
-  assignment.fromJson(Map<String, dynamic> json) {
+  Assignment.fromJson(Map<String, dynamic> json) {
     assignmentId = json['assignment_id'];
     title = json['title'];
     description = json['description'];
@@ -63,6 +64,45 @@ class Subject {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['subject_id'] = this.subjectId;
     data['name'] = this.name;
+    return data;
+  }
+}
+
+//----Create-----//
+class AssignmentCreate {
+  String? title;
+  String? description;
+  String? subjectId;
+  String? deadline;
+  String? semester;
+  String? faculty;
+
+  AssignmentCreate({
+    this.title,
+    this.description,
+    this.subjectId,
+    this.deadline,
+    this.semester,
+    this.faculty,
+  });
+
+  AssignmentCreate.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    description = json['description'];
+    subjectId = json['subject_id'];
+    deadline = json['deadline'];
+    semester = json['semester'];
+    faculty = json['faculty'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['title'] = this.title;
+    data['description'] = this.description;
+    data['subject_id'] = this.subjectId;
+    data['deadline'] = this.deadline;
+    data['semester'] = this.semester;
+    data['faculty'] = this.faculty;
     return data;
   }
 }

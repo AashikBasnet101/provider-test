@@ -1,10 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider_test/core/constants/app_api.dart';
 import 'package:provider_test/core/services/api_services.dart';
 import 'package:provider_test/core/utils/api_response.dart';
 import 'package:provider_test/core/utils/view_state.dart';
-import 'package:provider_test/features/login/login.dart';
 import 'package:provider_test/features/login/model/login.dart';
 import 'package:provider_test/features/signup/model/signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,21 +14,14 @@ class AuthProvider extends ChangeNotifier {
   String? contact;
   String? password;
   String? gender;
-  String? role; // store selected gender
+  String? role;
   ViewState loginStatus = ViewState.idle;
   ViewState signupStatus = ViewState.idle;
   String? errorMessage;
   ApiService service = ApiService();
 
-  setLoginState(ViewState value) {
-    loginStatus = value;
-    notifyListeners();
-  }
-
-  setSignupState(ViewState value) {
-    signupStatus = value;
-    notifyListeners();
-  }
+  bool _isPasswordVisible = false;
+  bool get isPasswordVisible => _isPasswordVisible;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -40,7 +31,22 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Signup method
+  void togglePasswordVisibility() {
+    _isPasswordVisible = !_isPasswordVisible;
+    notifyListeners();
+  }
+
+  void setLoginState(ViewState value) {
+    loginStatus = value;
+    notifyListeners();
+  }
+
+  void setSignupState(ViewState value) {
+    signupStatus = value;
+    notifyListeners();
+  }
+
+  // Signup
   Future<void> signupUser() async {
     setSignupState(ViewState.loading);
 
@@ -61,17 +67,21 @@ class AuthProvider extends ChangeNotifier {
 
     if (response.state == ViewState.success) {
       setSignupState(ViewState.success);
-    } else if (response.state == ViewState.error) {
+    } else {
       errorMessage = response.errorMessage;
       setSignupState(ViewState.error);
     }
   }
 
-  //login
-  Future<void> LoginUser() async {
+  // Login
+  Future<void> loginUser() async {
     setLoginState(ViewState.loading);
 
-    LoginU login = LoginU(email: email, password: password, deviceToken: "abc");
+    LoginU login = LoginU(
+      email: email,
+      password: password,
+      deviceToken: "abcd",
+    );
 
     ApiResponse response = await service.post(
       AppApi.login,
@@ -79,77 +89,63 @@ class AuthProvider extends ChangeNotifier {
     );
 
     if (response.state == ViewState.success) {
-      setLoginState(ViewState.success);
-      final data = response.data['data'];
-      final String? token = data?['token'];
-      final String? role = data?['user']?['role'];
+      final responseData = response.data;
 
-      final prefs = await SharedPreferences.getInstance();
+      // Ensure responseData is Map
+      if (responseData is Map<String, dynamic>) {
+        final data = responseData['data'];
+        if (data is Map<String, dynamic>) {
+          final String? token = data['token'];
+          final String? role = data['user']?['role'];
 
-      if (token != null) await prefs.setString("auth_token", token);
-      if (role != null) await prefs.setString("user_role", role);
+          final prefs = await SharedPreferences.getInstance();
+          if (token != null) await prefs.setString("auth_token", token);
+          if (role != null) await prefs.setString("user_role", role);
 
-      print("Saved token: $token, role: $role");
-    } else if (response.state == ViewState.error) {
+          print("Saved token: $token, role: $role");
+          setLoginState(ViewState.success);
+        } else {
+          errorMessage = "Unexpected login response format";
+          setLoginState(ViewState.error);
+        }
+      } else {
+        errorMessage = "Unexpected login response format";
+        setLoginState(ViewState.error);
+      }
+    } else {
       errorMessage = response.errorMessage;
       setLoginState(ViewState.error);
     }
   }
 
-  bool _isPasswordVisible = false;
-
-  bool get isPasswordVisible => _isPasswordVisible;
-
-  void togglePasswordVisibility() {
-    _isPasswordVisible = !_isPasswordVisible;
-    notifyListeners();
-  }
-
   // Validators
-  String? emailValidator(String? value) {
-    if (value == null || value.isEmpty) return "Email cannot be empty";
-    return null;
-  }
+  String? emailValidator(String? value) =>
+      value == null || value.isEmpty ? "Email cannot be empty" : null;
 
-  String? userValidator(String? value) {
-    if (value == null || value.isEmpty) return "Username cannot be empty";
-    return null;
-  }
+  String? userValidator(String? value) =>
+      value == null || value.isEmpty ? "Username cannot be empty" : null;
 
-  String? nameValidator(String? value) {
-    if (value == null || value.isEmpty) return "Full name cannot be empty";
-    return null;
-  }
+  String? nameValidator(String? value) =>
+      value == null || value.isEmpty ? "Full name cannot be empty" : null;
 
-  String? contactValidator(String? value) {
-    if (value == null || value.isEmpty) return "Contact cannot be empty";
-    return null;
-  }
+  String? contactValidator(String? value) =>
+      value == null || value.isEmpty ? "Contact cannot be empty" : null;
 
-  String? passwordValidator(String? value) {
-    if (value == null || value.isEmpty) return "Password cannot be empty";
+  String? passwordValidator(String? value) =>
+      value == null || value.isEmpty ? "Password cannot be empty" : null;
 
-    return null;
-  }
+  String? genderValidator(String? value) =>
+      value == null || value.isEmpty ? "Please select a gender" : null;
 
-  String? genderValidator(String? value) {
-    if (value == null || value.isEmpty) return "Please select a gender";
-    return null;
-  }
-
-  // Update gender
   void setGender(String? val) {
     gender = val;
     notifyListeners();
   }
 
-  String? roleValidator(String? value) {
-    if (value == null || value.isEmpty) return "Please select a role";
-    return null;
-  }
+  String? roleValidator(String? value) =>
+      value == null || value.isEmpty ? "Please select a role" : null;
 
-  // Update gender
-  void setrole(String? val) {
+  void setRole(String? val) {
     role = val;
     notifyListeners();
   }
