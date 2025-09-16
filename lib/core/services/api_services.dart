@@ -87,4 +87,33 @@ class ApiService {
       return ApiResponse(state: ViewState.error, errorMessage: e.toString());
     }
   }
+
+  Future<ApiResponse> patch(
+    String url, {
+    required String token,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      if (token.isNotEmpty) {
+        _dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+
+      final response = await _dio.patch(url, data: data);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return ApiResponse(
+          state: ViewState.success,
+          data: response.data.toString().isNotEmpty ? response.data : null,
+        );
+      } else {
+        return ApiResponse(
+          state: ViewState.error,
+          errorMessage:
+              'Failed to patch. Status code: ${response.statusCode}, Message: ${response.statusMessage}',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(state: ViewState.error, errorMessage: e.toString());
+    }
+  }
 }

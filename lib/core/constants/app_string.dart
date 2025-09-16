@@ -6,8 +6,12 @@ String signupLabel = "Sign Up";
 String titleLabel = "Title";
 String descriptionLabel = "Sign Up";
 String deadlineLabel = "Sign Up";
-
+String submitLabel = "Submit";
 String userLabel = "Username";
+String fileIdLabel = "File Id";
+String priorityLabel = "Priority";
+String categoryLabel = "Category";
+String targetAudienceLabel = "Target Audience";
 String nameLabel = "Full Name";
 String contactLabel = "Contact Number";
 String passwordLabel = "Password";
@@ -45,3 +49,11 @@ final List<Map<String, dynamic>> tabs = [
   {"icon": Icons.edit, "text": "Assigned"},
   {"icon": Icons.description, "text": "Submitted"},
 ];
+
+final List<String> priorities = ['low', 'medium', 'high'];
+final List<String> categories = ['exam', 'holiday', 'general', 'seminar'];
+final List<String> audiences = ['ALL', 'BCA', 'BIM', 'CSIT'];
+// app_string.dart
+
+const String noticeCreatedSuccess = "Notice created successfully!";
+const String noticeCreatedFailed = "Failed to create notice. Please try again.";

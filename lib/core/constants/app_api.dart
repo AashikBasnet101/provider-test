@@ -6,4 +6,6 @@ class AppApi {
   static const getsubjects = "$baseUrl/subjects/list";
   static const listAssignments = "$baseUrl/assignments/list";
   static const deleteAssignment = "$baseUrl/assignments/delete/";
+  static const updateAssignment = "$baseUrl/assignments/update/";
+  static const addNotice = "$baseUrl/notices/create/";
 }

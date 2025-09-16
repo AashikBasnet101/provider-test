@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:provider_test/features/assignment/add_assignment.dart';
+import 'package:provider_test/features/notice/add_notice.dart';
 import 'package:provider_test/features/provider/dashboard_provider.dart';
 
 class Dashboard extends StatelessWidget {
@@ -32,6 +35,26 @@ class Dashboard extends StatelessWidget {
             );
           }).toList(),
         ),
+      ),
+      floatingActionButton: Consumer<UserRoleProvider>(
+        builder: (context, roleProvider, _) {
+          if (roleProvider.role == "admin") {
+            return FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddNoticeScreen(),
+                  ),
+                );
+              },
+              backgroundColor: Colors.blue, // Replace with your primaryColor
+              child: const Icon(Icons.add, size: 30, color: Colors.white),
+            );
+          } else {
+            return const SizedBox.shrink(); // Hides FAB for other roles
+          }
+        },
       ),
     );
   }

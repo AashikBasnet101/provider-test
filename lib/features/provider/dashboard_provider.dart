@@ -3,6 +3,8 @@ import 'package:provider_test/features/assignment/add_assignment.dart';
 import 'package:provider_test/features/assignment/assign.dart';
 import 'package:provider_test/features/assignment/assignment.dart';
 import 'package:provider_test/features/home/dashboard.dart';
+import 'package:provider_test/features/home/profile.dart';
+import 'package:provider_test/features/login/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRoleProvider extends ChangeNotifier {
@@ -79,8 +81,29 @@ final List<Map<String, dynamic>> navItems = [
   {
     "icon": Icons.person_outline,
     "label": "Profile",
-    "page": const Center(child: Text("I am Profile")),
+    "page": const Center(child: ProfilePage()),
   },
 ];
 
 final List<Widget> screens = const [AssignmentScreen(), Text("submitter here")];
+
+//--logout--//
+Future<void> logout(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  const String tokenKey = "auth_token";
+  const String userRole = "user_role";
+
+  await prefs.remove(tokenKey);
+  await prefs.remove(userRole);
+
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(const SnackBar(content: Text("Logged out successfully!")));
+
+  // Navigate to Login page and remove all previous routes
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (_) => const Login()),
+    (Route<dynamic> route) => false,
+  );
+}

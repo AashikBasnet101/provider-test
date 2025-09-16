@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_test/core/constants/app_color.dart';
 import 'package:provider_test/core/constants/app_string.dart';
+import 'package:provider_test/core/utils/helper.dart';
 import 'package:provider_test/core/utils/view_state.dart';
 import 'package:provider_test/features/login/login.dart';
 import 'package:provider_test/features/provider/auth_provider.dart';
@@ -148,11 +149,7 @@ class _SignupState extends State<Signup> {
                             }
                           }
                         },
-                        child: authProvider.signupStatus == ViewState.loading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : Text(signupLabel),
+                        child: Text(signupLabel),
                       ),
 
                       SizedBox(height: 20),
@@ -187,6 +184,9 @@ class _SignupState extends State<Signup> {
               ),
             ),
           ),
+          authProvider.signupStatus == ViewState.loading
+              ? backdropFilter(context)
+              : SizedBox(),
         ],
       ),
     );

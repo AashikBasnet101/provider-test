@@ -17,7 +17,7 @@ class Assignment {
     this.deadline,
     this.faculty,
     this.semester,
-    required String subjectId,
+    String? subjectId,
   });
 
   Assignment.fromJson(Map<String, dynamic> json) {

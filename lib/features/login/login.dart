@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_test/core/constants/app_color.dart';
 import 'package:provider_test/core/constants/app_string.dart';
+import 'package:provider_test/core/utils/helper.dart';
 import 'package:provider_test/core/utils/view_state.dart';
-import 'package:provider_test/features/assignment/assignment.dart';
 import 'package:provider_test/features/home/bottom_navbar.dart';
-import 'package:provider_test/features/home/dashboard.dart';
-import 'package:provider_test/features/home/dashboard1.dart';
 import 'package:provider_test/features/provider/auth_provider.dart';
 import 'package:provider_test/features/signup/signup.dart';
 
@@ -26,26 +24,22 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    // final authProvider = context.read<AuthProvider>();
-
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            color: primaryColor,
-          ),
-
-          Consumer<AuthProvider>(
-            builder: (context, authProvider, child) {
-              return Align(
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          return Stack(
+            children: [
+              Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                color: primaryColor,
+              ),
+              Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
                   height: MediaQuery.of(context).size.height * 0.60,
                   width: MediaQuery.of(context).size.width,
                   color: secondaryColor,
-
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(12),
                     child: Form(
@@ -61,18 +55,17 @@ class _LoginState extends State<Login> {
                             },
                             prefixIcon: const Icon(Icons.email),
                           ),
-
                           CustomTextform(
                             labelText: passwordLabel,
                             validator: authProvider.passwordValidator,
                             onChanged: (p0) {
                               authProvider.password = p0;
                             },
-                            obscureText: authProvider.isPasswordVisible,
+                            obscureText: !authProvider.isPasswordVisible,
                             prefixIcon: const Icon(Icons.lock),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                context.watch<AuthProvider>().isPasswordVisible
+                                authProvider.isPasswordVisible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
                               ),
@@ -81,19 +74,15 @@ class _LoginState extends State<Login> {
                               },
                             ),
                           ),
-
                           const SizedBox(height: 20),
-
                           CustomElevatedButton(
                             backgroundColor: primaryColor,
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
                                 await authProvider.loginUser();
-
                                 if (authProvider.loginStatus ==
                                     ViewState.success) {
                                   displaySnackBar(context, loginSuccess);
-
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
@@ -107,26 +96,19 @@ class _LoginState extends State<Login> {
                                 }
                               }
                             },
-                            child: authProvider.loginStatus == ViewState.loading
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
-                                : Text(loginLabel),
+                            child: Text(loginLabel),
                           ),
-
-                          SizedBox(height: 20),
-
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text("Don't have an account? "),
-                              Spacer(),
                               GestureDetector(
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Signup(),
+                                      builder: (context) => const Signup(),
                                     ),
                                   );
                                 },
@@ -134,7 +116,6 @@ class _LoginState extends State<Login> {
                                   "Sign Up",
                                   style: TextStyle(
                                     color: primaryColor,
-
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -146,10 +127,13 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                 ),
-              );
-            },
-          ),
-        ],
+              ),
+              authProvider.loginStatus == ViewState.loading
+                  ? backdropFilter(context)
+                  : SizedBox(),
+            ],
+          );
+        },
       ),
     );
   }
